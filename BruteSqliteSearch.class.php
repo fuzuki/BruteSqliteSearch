@@ -68,7 +68,7 @@ class BruteSqliteSearch extends SearchSqlite {
 						// added spaces between them to make word breaks.
 						$stripped = '"' . trim( $stripped ) . '"';
 					}
-					$searchon .= "$quote%$stripped%$quote$wildcard ";
+					$searchon .= "$quote%$stripped%$quote$wildcard";
 				}
 				if ( count( $strippedVariants ) > 1 ) {
 					$searchon .= ')';
@@ -87,6 +87,9 @@ class BruteSqliteSearch extends SearchSqlite {
 		$searchon = $this->db->addQuotes( $searchon );
 		$field = $this->getIndexField( $fulltext );
 
+		$field = str_replace('si_title','page_title',$field);
+		$field = str_replace('si_text','old_text',$field);
+
 		return " $field LIKE $searchon ";
 	}
 
@@ -100,11 +103,21 @@ class BruteSqliteSearch extends SearchSqlite {
 	function queryMain( $filteredTerm, $fulltext ) {
 		$match = $this->parseQuery( $filteredTerm, $fulltext );
 		$page = $this->db->tableName( 'page' );
-		$searchindex = $this->db->tableName( 'searchindex' );
-		$query_str = "SELECT $searchindex.rowid, page_namespace, page_title " .
-			"FROM $page,$searchindex " .
-			"WHERE page_id=$searchindex.rowid AND $match";
+		$searchindex = $this->db->tableName( 'text' );
+		$query_str = "SELECT page_id, page_namespace, page_title " .
+			"FROM page join revision on page_latest = rev_id join text on rev_text_id = old_id " .
+			"WHERE $match";
 		return $query_str;
+	}
+
+	function getCountQuery( $filteredTerm, $fulltext ) {
+		$match = $this->parseQuery( $filteredTerm, $fulltext );
+		$page = $this->db->tableName( 'page' );
+		$searchindex = $this->db->tableName( 'text' );
+		return "SELECT COUNT(*) AS c " .
+			"FROM page join revision on page_latest = rev_id join text on rev_text_id = old_id " .
+			"WHERE $match " .
+			$this->queryNamespaces();
 	}
 }
 ?>

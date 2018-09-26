@@ -19,7 +19,7 @@ $wgExtensionCredits['other'][] = array(
         'name' => 'BruteSqliteSearch',
         'author' => 'fuzuki',
         'version' => '1.31-20180918',
-        'url' => 'http://hiruandon.net/',
+        'url' => 'https://github.com/fuzuki/BruteSqliteSearch',
         'description' => 'Full text search using SQL \'LIKE\' statement',
 );
 $wgAutoloadClasses['BruteSqliteSearch'] = dirname( __FILE__ ) . '/BruteSqliteSearch.class.php';
